@@ -24,6 +24,7 @@ return new class extends Migration
             $table->json('navigation')->nullable();
             $table->json('features')->nullable();
             $table->json('user_features')->nullable();
+            $table->json('ai')->nullable();
             $table->json('google_analytics')->nullable();
             $table->timestamps();
         });
