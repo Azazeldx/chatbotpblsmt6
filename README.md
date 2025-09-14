@@ -9,13 +9,12 @@ Make sure you php.ini has enable curl, gd, intl, and zip extension <br />
 <br />
 Setup Development : <br />
 clone <br />
-setup .env (you can get the env at the storage/env-editor/..) <br />
-import file sql (opt) <br />
+setup .env (/storage/env-editor/file) <br />
+import database (.sql) <br />
 composer install <br />
 npm install <br />
 php artisan key:generate <br />
-php artisan storage:link || ln -s [target_path] [link_name] (ex. ln -s .../project/storage/app/public .../project/public/storage)<br />
-php artisan migrate || import file sql (no need if already have the database) <br />
+php artisan storage:link || ln -s [target_path] [link_name] (e.g. ln -s .../project/storage/app/public .../project/public/storage)<br />
 php artisan optimize <br />
 npm run build <br />
 php artisan serve <br />
@@ -23,11 +22,11 @@ php artisan serve <br />
 Setup Deployment : <br />
 Setup your ssh in hosting and github
 clone <br />
-setup .env (you can get the env at the storage/env-editor/..) <br />
-import file sql (opt) <br />
+setup .env (/storage/env-editor/file) <br />
+import database (.sql) <br />
 composer install <br />
 php artisan key:generate <br />
-ln -s [target_path] [link_name] (ex. ln -s .../project/storage/app/public .../project/public/storage, help: use pwd command in terminal to get relative path)<br />
+php artisan storage:link || ln -s [target_path] [link_name] (e.g. ln -s .../project/storage/app/public .../project/public/storage) [help: use pwd command in terminal to get relative path]<br />
 php artisan optimize <br />
 <br />
 Notes : <br />

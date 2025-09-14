@@ -5,7 +5,7 @@
         <div class="absolute top-0 left-0 w-full lg:h-svh overflow-hidden aspect-[16/9] z-[90] flex flex-col items-center justify-center py-6 px-[10%] text-center text-white bg-black/25">
             <h2 class="mb-2 text-3xl font-bold sm:mb-4 md:text-5xl lg:text-7xl">Welcome To {{ $data['site_name'] }}</h2>
             <p class="hidden max-w-4xl mb-4 sm:block md:text-xl lg:text-2xl">
-                Creator: To Create a Work to be Realized or Introduced Haichi: translated means “Showcasing” Thus, we are a community actively facilitating creators, especially in Bali, to showcase their original works.
+                Kami adalah komunitas pop culture yang secara aktif mendukung para kreator, terutama di Bali, untuk memperkenalkan dan menjual karya mereka! Creator yang kami wadahi adalah para pembuat ilustrasi, cosplay, komik, animasi, game, dan pastinya mewadahi para fans dari pop culture itu sendiri.
             </p>
             <a href="{{ route('event') }}" class="flex items-center gap-2 px-4 py-2 text-lg text-white transition-transform transform rounded-lg bg-secondary-500 hover:scale-105">
                 Lihat Event
@@ -13,40 +13,30 @@
             </a>
         </div>
 
+        @php
+            $images = Storage::disk('public')->allFiles('homepage');
+            foreach ($images as $key => $item) {
+                $image['path'] = $item;
+                $image['info'] = Str::substr($item, 9);
+                $images[$key] = $image;
+            }
+            $count = count($images);
+        @endphp
+
         <!-- Carousel wrapper -->
         <div class="relative w-full lg:h-svh aspect-[16/9] overflow-hidden">
-            <!-- Item 1 -->
-            <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                <img src="{{ asset('image/home/banner1.jpg') }}" class="block object-cover w-full h-full"
-                    alt="Image 1">
-            </div>
-            <!-- Item 2 -->
-            <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                <img src="{{ asset('image/home/banner2.jpg') }}" class="block object-cover w-full h-full"
-                    alt="Image 2">
-            </div>
-            <!-- Item 3 -->
-            <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                <img src="{{ asset('image/home/banner3.jpg') }}" class="block object-cover w-full h-full"
-                    alt="Image 3">
-            </div>
-            <!-- Item 4 -->
-            <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                <img src="{{ asset('image/home/banner4.jpg') }}" class="block object-cover w-full h-full"
-                    alt="Image 4">
-            </div>
+            @foreach ($images as $image)
+                <div class="hidden duration-700 ease-in-out" data-carousel-item>
+                    <img src="{{ Storage::url($image['path']) }}" class="block object-cover w-full h-full" alt="{{ $image['info'] }}">
+                </div>
+            @endforeach
         </div>
 
         <!-- Slider indicators (Hidden on Mobile & Tablet) -->
         <div class="absolute z-[100] hidden sm:flex space-x-3 -translate-x-1/2 bottom-5 left-1/2 rtl:space-x-reverse">
-            <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="Slide 1"
-                data-carousel-slide-to="0"></button>
-            <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 2"
-                data-carousel-slide-to="1"></button>
-            <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 3"
-                data-carousel-slide-to="2"></button>
-            <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 4"
-                data-carousel-slide-to="3"></button>
+            @foreach ($images as $key => $image)
+                <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="{{ $image['info'] }}" data-carousel-slide-to="{{ $key }}"></button>
+            @endforeach
         </div>
 
         <!-- Slider controls -->

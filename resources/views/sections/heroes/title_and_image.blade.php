@@ -18,7 +18,7 @@
 
         <!-- Right Side: Image -->
         <div class="items-end justify-end hidden w-full lg:flex lg:w-1/3">
-            <img src="{{ asset('image/home/shape.png') }}" alt="Contact Us Image" class="drop-shadow-md">
+            <img src="{{ Storage::url("others/avatar.webp") }}" alt="Contact Us Image" class="drop-shadow-md">
         </div>
     </div>
 </div>
