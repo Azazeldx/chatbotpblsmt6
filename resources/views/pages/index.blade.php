@@ -1,5 +1,4 @@
 @extends('layouts.landing-base')
-
 @section('content')
     @foreach ($data['page']->sections as $section)
         @php

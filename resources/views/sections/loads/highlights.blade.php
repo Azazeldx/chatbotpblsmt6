@@ -82,6 +82,7 @@
             @php
                 $first = $data['loads'][$section->dataset->variable_name]->first();
             @endphp
+            @if ($first != null)
             <x-links.detail
                 category='{{ $first->category->category_name }}'
                 slug='{{ $first->slug }}'
@@ -103,6 +104,7 @@
                     <p class="text-sm">{{ date('d/m/Y', strtotime($first->published_at)) }}</p>
                 </div>
             </x-links.detail>
+            @endif
         </div>
 
         <!-- Right Column: 3 Small Cards with Image and Text -->

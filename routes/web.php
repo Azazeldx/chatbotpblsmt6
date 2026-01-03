@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\WeatherController;
 
 if (config('general-settings.features.ai', false)) {
     Route::controller(ChatbotController::class)->group(function () {
@@ -66,3 +67,5 @@ if (config('app.debug', false)) {
         return view('tests.berita_detail');
     })->name('berita_detail');
 }
+
+Route::get('/weather/current-jimbaran', [WeatherController::class, 'currentJimbaran']);

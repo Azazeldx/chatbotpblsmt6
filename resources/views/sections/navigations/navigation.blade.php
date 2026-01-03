@@ -2,11 +2,7 @@
     <div class="flex flex-row items-center justify-between w-full px-4 mx-auto lg:px-0 lg:w-11/12">
         <!-- Logo -->
         <a href="{{ route('/') }}">
-            @if ($data['site_logo'])
-                <img class="w-[80px] lg:!w-[120px] h-auto" src="{{ Storage::url($data['site_logo']) }}" alt="$data['site_name']">
-            @else
-                <h1 class="text-2xl font-bold">{{ $data['site_name'] }}</h1>
-            @endif
+            <img class="w-[50px] lg:!w-[80px] h-auto" src="{{ asset('storage/others/LogoPnbSmall.png') }}" alt="{{ $data['site_name'] }}">
         </a>
 
         <!-- Navbar items -->
@@ -30,38 +26,26 @@
         </ul>
 
         <!-- Search Form -->
-        @if ($data['navigation']['search'])
-            <form action="{{ $data['navigation']['search']['slug'] }}" method="GET" class="relative flex items-center justify-center gap-4 md:gap-0 w-fit md:w-1/5">
-                <input type="text" name="search" id="search" placeholder="Search..." class="hidden w-full py-2 pl-10 pr-2 text-sm text-gray-800 placeholder-gray-400 border-none rounded-full shadow-md md:block focus:outline-none focus:border-red focus:ring-primary-500 lg:text-base">
-                <button type="submit" class="relative flex items-center md:absolute md:inset-y-0 md:left-4 md:text-gray-500">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
-                <a id="showMenu" class="rounded-md cursor-pointer md:hidden">
-                    <i class="fa-solid fa-bars"></i>
-                </a>
-            </form>
-        @else
             <a id="showMenu" class="rounded-md cursor-pointer md:hidden">
                 <i class="fa-solid fa-bars"></i>
             </a>
-        @endif
     </div>
 </header>
 
 <script>
-    window.addEventListener('scroll', function() {
-        const navbar = document.getElementById('navbar');
-        const navMenu = document.getElementById('navMenu');
-        if (window.scrollY > 50) {
-            navbar.classList.add('!bg-primary-500');
-            navbar.classList.add('!text-white');
-            navMenu.classList.add('!bg-primary-500');
-        } else {
-            navbar.classList.remove('!bg-primary-500');
-            navbar.classList.remove('!text-white');
-            navMenu.classList.remove('!bg-primary-500');
-        }
-    });
+    // window.addEventListener('scroll', function() {
+    //     const navbar = document.getElementById('navbar');
+    //     const navMenu = document.getElementById('navMenu');
+    //     if (window.scrollY > 50) {
+    //         navbar.classList.add('!bg-primary-500');
+    //         navbar.classList.add('!text-white');
+    //         navMenu.classList.add('!bg-primary-500');
+    //     } else {
+    //         navbar.classList.remove('!bg-primary-500');
+    //         navbar.classList.remove('!text-white');
+    //         navMenu.classList.remove('!bg-primary-500');
+    //     }
+    // });
 
     const showMenu = document.getElementById('showMenu');
     showMenu.addEventListener('click', function() {

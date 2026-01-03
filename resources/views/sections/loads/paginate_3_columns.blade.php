@@ -2,7 +2,7 @@
 
 @section('title')
     <div class="relative flex flex-col items-center mb-8 space-y-2 border-b-2 border-gray-200">
-        <h1 class="pb-4 text-2xl font-semibold border-b-4 border-red sm:text-3xl lg:text-4xl">{{ $section->dataset->category->category_name }} Terbaru</h1>
+        <h1 class="pb-4 text-2xl font-semibold border-b-4 border-red sm:text-3xl lg:text-4xl">{{ $section->dataset->category->category_name }}</h1>
     </div>
 @overwrite
 

@@ -1,18 +1,43 @@
-<div class="relative flex flex-row pb-4 mb-4 border-b border-gray-300 sm:!flex-col group lg:border-none" title="{{ $item->title }}">
-    <x-links.detail category='{{ $item->category->slug }}' slug='{{ $item->slug }}' class='absolute top-0 bottom-0 left-0 right-0 z-10' has_detail_page='{{ $item->category->detail_page ? true : false }}' />
-    <div class="w-3/12 mr-4 sm:mr-0 sm:!mb-4 sm:!w-full">
-        <img src="{{ Storage::url($item->cover?->path) }}" alt="{{ $item->cover?->alt ?? $item->title }}" class="object-cover w-full transition-transform rounded-lg shadow-md group-hover:scale-105 aspect-[5/4] sm:aspect-[16/9]" loading="lazy">
-    </div>
-    <div class="flex flex-col w-9/12 sm:!w-full grow">
-        <div class="flex flex-wrap mb-0.5">
-            @foreach ($item->tags as $tag)
-                <x-links.tag search="{{ $data['navigation']['search'] ? true : false }}" category='{{ $item->category->slug }}' tag='{{ $tag->tag_name }}' slug='{{ $tag->slug }}'/>
-            @endforeach
+<div class="flex flex-col overflow-hidden transition bg-white rounded-lg shadow group hover:shadow-lg h-full">
+    <div class="relative grow">
+        <x-links.detail 
+            category='{{ $item->category->slug }}' 
+            slug='{{ $item->slug }}' 
+            class='absolute inset-0 z-10' 
+            has_detail_page='{{ $item->category->detail_page ? true : false }}' 
+        />
+        
+        <div class="overflow-hidden">
+            <img src="{{ Storage::url($item->cover?->path) }}" 
+                 alt="{{ $item->cover?->alt ?? $item->title }}" 
+                 class="object-cover w-full h-48 transition-transform duration-300 group-hover:scale-105" 
+                 loading="lazy">
         </div>
-        <div class="flex flex-col justify-start grow">
-            <h5 class="text-sm font-bold sm:!text-lg line-clamp-2">{{ $item->title }}</h5>
-            <p class="text-[0.5rem] md:!text-sm mb-1 md:mb-2">{{ \Carbon\Carbon::parse($item->published_at)->diffForHumans() }}</p>
-            <p class="text-[0.5rem] md:!text-sm line-clamp-2">{{ $item->preview_content }}</p>
+
+        <div class="p-4 flex flex-col h-full">
+            <div class="flex flex-wrap gap-2 mb-3">
+                @foreach ($item->tags as $tag)
+                    <span class="text-[10px] uppercase font-bold tracking-wider bg-blue-50 text-blue-600 px-2 py-1 rounded">
+                        {{ $tag->tag_name }}
+                    </span>
+                @endforeach
+            </div>
+
+            <h3 class="mb-1 font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                {{ $item->title }}
+            </h3>
+
+            <span class="text-xs text-gray-400 mb-2">
+                    {{ \Carbon\Carbon::parse($item->published_at)->diffForHumans() }}
+            </span>
+
+            <p class="mb-4 text-sm text-gray-600 line-clamp-3">
+                {{ $item->preview_content }}
+            </p>
+
+            <span class="text-sm font-semibold text-blue-600 group-hover:underline">
+                    Selengkapnya →
+            </span>
         </div>
     </div>
 </div>

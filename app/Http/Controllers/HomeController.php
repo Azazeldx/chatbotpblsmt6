@@ -18,6 +18,7 @@ class HomeController extends Controller
     public function index()
     {
         $data = $this->data();
+        $data['weather'] = WeatherController::getWeatherData();
         return view('pages.index', compact('data'));
     }
 
@@ -59,20 +60,13 @@ class HomeController extends Controller
         $data = config('general-settings');
         $data['category'] = Category::where('slug', $category)->firstOrFail();
         $data['article'] = Article::where('slug', $slug)->whereNotNull('published_at')->firstOrFail();
-        $tags = [];
-
-        foreach ($data['article']->tags as $key => $tag) {
-            $tags[$key] = $tag->tag_name;
-        }
 
         $data['related'] = Article::query()
-            ->where('id', "!=", $data['article']->id)
-            ->where('category_id', "=", $data['article']->category_id)
-            ->whereNotNull('published_at')
-            ->whereHas('tags', function ($q) use ($tags) {
-                $q->whereIn('tag_name', $tags);
-            })
-            ->take(4)
+            ->where('id', "!=", $data['article']->id) 
+            ->where('category_id', "=", $data['article']->category_id) 
+            ->whereNotNull('published_at') 
+            ->latest('published_at')    
+            ->take(5) 
             ->get();
 
         if ($data['features']['sponsors']) {
@@ -80,6 +74,8 @@ class HomeController extends Controller
                 return $item->category->sort_order ?? 999;
             });
         }
+
+        // Pastikan view path-nya benar
         return view('pages.details.'.$data['category']->detail_page, compact('data'));
     }
 

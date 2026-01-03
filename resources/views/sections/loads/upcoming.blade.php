@@ -1,7 +1,6 @@
 {{-- < lg --}}
-<div class="w-full mx-auto aspect-[16/9] relative block lg:hidden">
+{{-- <div class="w-full mx-auto aspect-[16/9] relative block lg:hidden">
     <div id="default-carousel" class="relative w-full h-full" data-carousel="slide">
-
         <!-- Carousel wrapper -->
         <div class="relative w-full aspect-[16/9] overflow-hidden">
             @foreach ($data['loads'][$section->dataset->variable_name] as $key => $item)
@@ -65,10 +64,10 @@
             </button>
         </div>
     </div>
-</div>
+</div> --}}
 
 {{-- > lg --}}
-<div class="lg:!px-20 lg:!py-12 md:!px-16 md:!py-12 px-2 py-4 mx-auto max-w-screen-3xl hidden lg:block">
+{{-- <div class="lg:!px-20 lg:!py-12 md:!px-16 md:!py-12 px-2 py-4 mx-auto max-w-screen-3xl hidden lg:block">
     <!-- Section Title -->
     <div class="flex items-center justify-between mb-8">
         <h1 class="w-full text-4xl font-semibold text-center">{{ $section->dataset->category->category_name }} Sorotan</h1>
@@ -157,5 +156,5 @@
             </span>
         </button>
     </div>
-</div>
+</div> --}}
 

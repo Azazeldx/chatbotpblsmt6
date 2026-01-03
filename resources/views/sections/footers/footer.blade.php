@@ -3,11 +3,7 @@
 
         <!-- Logo Section (No Stretching, Center on Mobile, Left on Tablet/Desktop) -->
         <div class="flex col-span-2 mb-6 md:justify-center md:col-span-3 lg:col-span-1">
-            @if ($data['site_logo'])
-                <img class="h-auto max-w-[150px] md:max-w-[192px] lg:max-h-[100px] lg:max-w-[180px]" src="{{ Storage::url($data['site_logo']) }}" alt="{{ $data['site_name'] }}">
-            @else
-                <h2 class="text-3xl font-bold sm:text-4xl">{{ $data['site_name'] }}</h2>
-            @endif
+            <img class="h-auto max-w-[100px] md:max-w-[122px] lg:max-h-[100px] lg:max-w-[120px]" src="{{ asset('storage/others/logoPNB.png') }}" alt="{{ $data['site_name'] }}">           
         </div>
 
         <!-- Discover Section -->

@@ -1,18 +1,5 @@
-<div class="w-full mx-auto lg:h-svh aspect-[16/9] relative">
-    <div id="default-carousel" class="relative w-full h-full lg:h-svh" data-carousel="slide">
-
-        {{-- Tagline --}}
-        <div class="absolute top-0 left-0 w-full lg:h-svh overflow-hidden aspect-[16/9] z-[90] flex flex-col items-center justify-center py-6 px-[10%] text-center text-white bg-black/25">
-            <h2 class="mb-2 text-3xl font-bold sm:mb-4 md:text-5xl lg:text-7xl">Welcome To {{ $data['site_name'] }}</h2>
-            <p class="hidden max-w-4xl mb-4 sm:block md:text-xl lg:text-2xl">
-                Kami adalah komunitas pop culture yang secara aktif mendukung para kreator, terutama di Bali, untuk memperkenalkan dan menjual karya mereka! Creator yang kami wadahi adalah para pembuat ilustrasi, cosplay, komik, animasi, game, dan pastinya mewadahi para fans dari pop culture itu sendiri.
-            </p>
-            <a href="{{ route('event') }}" class="flex items-center gap-2 px-4 py-2 text-lg text-white transition-transform transform rounded-lg bg-secondary-500 hover:scale-105">
-                Lihat Event
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
-        </div>
-
+<div class="w-full mx-auto h-[30vh] sm:h-[50vh] lg:h-[60vh] relative">
+    <div id="default-carousel" class="relative w-full h-full" data-carousel="slide">
         @php
             $images = Storage::disk('public')->allFiles('homepage');
             foreach ($images as $key => $item) {
@@ -24,7 +11,7 @@
         @endphp
 
         <!-- Carousel wrapper -->
-        <div class="relative w-full lg:h-svh aspect-[16/9] overflow-hidden">
+        <div class="relative w-full h-full overflow-hidden">
             @foreach ($images as $image)
                 <div class="hidden duration-700 ease-in-out" data-carousel-item>
                     <img src="{{ Storage::url($image['path']) }}" class="block object-cover w-full h-full" alt="{{ $image['info'] }}">
