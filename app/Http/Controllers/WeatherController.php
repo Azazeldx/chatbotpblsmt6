@@ -16,8 +16,7 @@ class WeatherController extends Controller
             $lon = "115.16206160767392";
 
             try {
-                $response = Http::withOptions(['verify' => false])
-                    ->get("https://api.openweathermap.org/data/2.5/weather", [
+                $response = Http::get("https://api.openweathermap.org/data/2.5/weather", [
                         'lat' => $lat,
                         'lon' => $lon,
                         'appid' => $apiKey,
