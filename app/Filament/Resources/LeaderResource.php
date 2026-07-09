@@ -70,7 +70,7 @@ class LeaderResource extends Resource
                     ->default(0),
 
                 Forms\Components\Toggle::make('is_active')
-                    ->label('Tampilkan di beranda')
+                    ->label('Tampilkan')
                     ->default(true),
             ]);
     }
@@ -88,7 +88,7 @@ class LeaderResource extends Resource
                     ->label('Foto')
                     ->disk('public')
                     ->circular()
-                    ->defaultImageUrl(fn (Leader $record) => $record->photo_url),
+                    ->defaultImageUrl(fn(Leader $record) => $record->photo_url),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
                     ->searchable(),
