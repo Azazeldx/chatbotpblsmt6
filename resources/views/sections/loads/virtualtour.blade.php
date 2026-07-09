@@ -15,10 +15,10 @@
                 VIRTUAL TOUR 360
             </h3>
             <p class="text-xl md:text-2xl text-center font-medium opacity-90 mb-8 uppercase tracking-widest">
-                Fasilitas Politeknik Negeri Bali
+                WILAYAH KABUPATEN PASURUAN
             </p>
             
-            <a href="/virtual/index.htm" target="_blank" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-xl transition-all transform hover:scale-105 shadow-xl">
+            <a href="/virtual/index.htm" target="_blank" class="inline-flex items-center bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold py-4 px-10 rounded-xl transition-all transform hover:scale-105 shadow-xl">
                 <i class="fas fa-vr-cardboard mr-3 text-2xl"></i>
                 MULAI TOUR SEKARANG
             </a>

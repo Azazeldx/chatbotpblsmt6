@@ -1,59 +1,46 @@
-<div class="w-full mx-auto h-[30vh] sm:h-[50vh] lg:h-[60vh] relative">
-    <div id="default-carousel" class="relative w-full h-full" data-carousel="slide">
-        @php
-            $images = Storage::disk('public')->allFiles('homepage');
-            foreach ($images as $key => $item) {
-                $image['path'] = $item;
-                $image['info'] = Str::substr($item, 9);
-                $images[$key] = $image;
-            }
-            $count = count($images);
-        @endphp
+<div class="w-full relative min-h-[420px] h-[60vh] lg:h-[72vh] overflow-hidden group">
+    @php
+        // Cache daftar file agar tidak scan filesystem tiap request (LCP/response time)
+        $images = \Illuminate\Support\Facades\Cache::remember('hero_homepage_images', 300, function () {
+            return Storage::disk('public')->allFiles('homepage');
+        });
+        // Ambil gambar pertama saja agar tidak bergeser (statis)
+        $heroImage = count($images) > 0 ? Storage::url($images[0]) : null;
+    @endphp
 
-        <!-- Carousel wrapper -->
-        <div class="relative w-full h-full overflow-hidden">
-            @foreach ($images as $image)
-                <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                    <img src="{{ Storage::url($image['path']) }}" class="block object-cover w-full h-full" alt="{{ $image['info'] }}">
-                </div>
-            @endforeach
+    @if($heroImage)
+        <!-- Gambar Latar dengan Efek Modern (Zoom in sangat halus saat di-hover) -->
+        <div class="absolute inset-0 transition-transform duration-[2000ms] ease-out group-hover:scale-105">
+            <img src="{{ $heroImage }}" class="object-cover object-center w-full h-full" alt="Banner Utama Kabupaten Pasuruan" fetchpriority="high" decoding="async" width="1920" height="1080">
         </div>
 
-        <!-- Slider indicators (Hidden on Mobile & Tablet) -->
-        <div class="absolute z-[100] hidden sm:flex space-x-3 -translate-x-1/2 bottom-5 left-1/2 rtl:space-x-reverse">
-            @foreach ($images as $key => $image)
-                <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="{{ $image['info'] }}" data-carousel-slide-to="{{ $key }}"></button>
-            @endforeach
-        </div>
+        <!-- Gradient Overlay agar teks terbaca & terlihat premium -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30"></div>
+    @else
+        <!-- Placeholder bila belum ada gambar -->
+        <div class="absolute inset-0 bg-gradient-to-br from-[#1e3a8a] via-[#1e40af] to-[#0f172a]"></div>
+    @endif
 
-        <!-- Slider controls -->
-        <div class="hidden lg:block">
-            <button type="button"
-                class="absolute top-0 left-0 z-[100] flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                data-carousel-prev>
-                <span
-                    class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70">
-                    <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M5 1 1 5l4 4" />
-                    </svg>
-                    <span class="sr-only">Previous</span>
-                </span>
-            </button>
-            <button type="button"
-                class="absolute top-0 right-0 z-[100] flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                data-carousel-next>
-                <span
-                    class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70">
-                    <svg class="w-4 h-4 text-white dark:text-gray-800" aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="m1 9 4-4-4-4" />
-                    </svg>
-                    <span class="sr-only">Next</span>
-                </span>
-            </button>
+    <!-- Konten Hero -->
+    <div class="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
+        <span data-aos="fade-down"
+              class="inline-flex items-center gap-2 bg-emerald-500/90 text-white text-[11px] sm:text-xs font-semibold uppercase tracking-[0.25em] px-4 py-1.5 rounded-full shadow-lg mb-5">
+            Portal Resmi RPJMD
+        </span>
+
+        <h1 data-aos="fade-up"
+            class="text-white font-extrabold tracking-tight leading-none text-5xl sm:text-7xl lg:text-8xl drop-shadow-2xl">
+            PASURUAN
+        </h1>
+
+        <p data-aos="fade-up" data-aos-delay="150"
+           class="mt-4 text-white/85 text-xs sm:text-base lg:text-lg font-light uppercase tracking-[0.3em]">
+            Gerakan Menuju Masa Depan 2025&ndash;2029
+        </p>
+
+        <!-- Indikator scroll -->
+        <div data-aos="fade-up" data-aos-delay="300" class="mt-8 flex flex-col items-center gap-2">
+            <span class="w-px h-10 bg-gradient-to-b from-white/70 to-transparent"></span>
         </div>
     </div>
 </div>

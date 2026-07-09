@@ -21,8 +21,13 @@
         <meta name="description" content="{{ $data['site_description'] }}">
     @endif
 
+    @if (config('general-settings.features.ai', false))
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+    @endif
+
     {{-- CDN --}}
-    <script src="https://kit.fontawesome.com/f87eaab4e6.js" crossorigin="anonymous"></script>
+    <script defer src="https://kit.fontawesome.com/f87eaab4e6.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +41,7 @@
     @include('components.style')
 </head>
 
-<body class="break-words">
+<body class="break-words overflow-x-hidden">
     @if ($data['navigation']['header'])
         @include('sections.'.$data['navigation']['header']['layout_path'])
     @endif
@@ -45,6 +50,10 @@
 
     @if ($data['navigation']['footer'])
         @include('sections.'.$data['navigation']['footer']['layout_path'])
+    @endif
+
+    @if (config('general-settings.features.ai', false))
+        @include('components.chatbot')
     @endif
 
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>

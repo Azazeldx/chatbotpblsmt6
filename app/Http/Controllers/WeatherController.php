@@ -10,19 +10,19 @@ class WeatherController extends Controller
 {
     public static function getWeatherData()
     {
-        return Cache::remember('weather_jimbaran', 600, function () {
+        return Cache::remember('weather_pasuruan', 600, function () {
             $apiKey = config('services.openweather.key');
-            $lat = "-8.798755622508684";
-            $lon = "115.16206160767392";
+            $lat = "-7.6433";
+            $lon = "112.9067";
 
             try {
-                $response = Http::get("https://api.openweathermap.org/data/2.5/weather", [
-                        'lat' => $lat,
-                        'lon' => $lon,
-                        'appid' => $apiKey,
-                        'units' => 'metric', #Ini instruksi penting agar angka yang dikirim dalam format Celsius
-                        'lang' => 'id' #Ini instruksi penting agar deskripsi cuaca dalam bahasa Indonesia
-                    ]);
+                $response = Http::timeout(5)->connectTimeout(3)->get("https://api.openweathermap.org/data/2.5/weather", [
+                    'lat' => $lat,
+                    'lon' => $lon,
+                    'appid' => $apiKey,
+                    'units' => 'metric', #Ini instruksi penting agar angka yang dikirim dalam format Celsius
+                    'lang' => 'id' #Ini instruksi penting agar deskripsi cuaca dalam bahasa Indonesia
+                ]);
 
                 if ($response->successful()) {
                     $data = $response->json();
@@ -31,11 +31,11 @@ class WeatherController extends Controller
                     // Contoh: 27.55 jadi 27
                     $data['main']['temp_floor'] = floor($data['main']['temp']);
 
-                    // Menambahkan Waktu Update (Zona Waktu WITA)
-                    $data['waktu_update'] = Carbon::now('Asia/Makassar')->locale('id')->translatedFormat('l, H:i') . ' WITA';
+                    // Menambahkan Waktu Update (Zona Waktu WIB)
+                    $data['waktu_update'] = Carbon::now('Asia/Jakarta')->locale('id')->translatedFormat('l, H:i') . ' WIB';
 
                     // Mapping Status Indo
-                    $statusIndo = match($mainWeather) {
+                    $statusIndo = match ($mainWeather) {
                         'Clear' => 'Cerah',
                         'Clouds' => 'Berawan',
                         'Rain', 'Drizzle' => 'Hujan',
@@ -45,27 +45,27 @@ class WeatherController extends Controller
                     };
 
                     // Mapping Pesan Himbauan
-                    $pesanHimbauan = match($mainWeather) {
-                        'Clear' => "Cuaca di Jimbaran sangat cerah hari ini. Tetap jaga hidrasi dan selamat beraktivitas di kampus PNB!",
-                        'Clouds' => "Hari ini Jimbaran sedang berawan. Cuaca yang cukup teduh dan sangat aman untuk beraktivitas di area Politeknik.",
-                        'Rain', 'Drizzle' => "Jimbaran sedang diguyur hujan. Harap mahasiswa berhati-hati, gunakan jas hujan/payung, dan waspada jalanan licin.",
-                        'Thunderstorm' => "Waspada! Sedang terjadi hujan badai di Jimbaran. Tetap berlindung di dalam gedung dan tunda perjalanan jika tidak mendesak.",
-                        default => "Pantau terus prakiraan cuaca hari ini untuk kelancaran aktivitas akademik Anda di Politeknik Negeri Bali.",
+                    $pesanHimbauan = match ($mainWeather) {
+                        'Clear' => "Cuaca di Pasuruan sangat cerah hari ini. Tetap semangat dalam mengawal dan mewujudkan program RPJMD!",
+                        'Clouds' => "Hari ini Pasuruan sedang berawan. Cuaca yang sangat mendukung untuk aktivitas dan pelayanan masyarakat.",
+                        'Rain', 'Drizzle' => "Pasuruan sedang diguyur hujan. Harap berhati-hati di jalan dan utamakan keselamatan saat beraktivitas di luar.",
+                        'Thunderstorm' => "Waspada! Sedang terjadi hujan badai di Pasuruan. Tunda perjalanan jika tidak mendesak demi keselamatan bersama.",
+                        default => "Pantau terus prakiraan cuaca hari ini untuk kelancaran aktivitas di wilayah Kabupaten Pasuruan.",
                     };
 
                     // Mapping Background
-                    $bgImage = match($mainWeather) {
-                        'Clear' => 'PnbGoodWeather.webp',
-                        'Rain', 'Drizzle' => 'gambarPNBHeavyRain.webp',
-                        'Thunderstorm' => 'gambarPNBHeavyRainLightning.webp',
-                        'Clouds' => 'PnbMendung.webp',
-                        default => 'PnbGoodWeather.webp',
+                    $bgImage = match ($mainWeather) {
+                        'Clear' => 'pasuruanGoodWeather.webp',
+                        'Rain', 'Drizzle' => 'pasuruanGoodWeather.webp',
+                        'Thunderstorm' => 'pasuruanGoodWeather.webp',
+                        'Clouds' => 'pasuruanGoodWeather.webp',
+                        default => 'pasuruanGoodWeather.webp',
                     };
 
                     $data['status_indo'] = $statusIndo;
-                    $data['pesan_himbauan'] = $pesanHimbauan;   
+                    $data['pesan_himbauan'] = $pesanHimbauan;
                     $data['custom_bg'] = $bgImage;
-                    
+
                     return $data;
                 }
                 return null;

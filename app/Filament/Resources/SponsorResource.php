@@ -39,7 +39,6 @@ class SponsorResource extends Resource
                             CuratorPicker::make('image_id')
                                 ->label('Image')
                                 ->required()
-                                ->relationship('image', 'id')
                         ])
                         ->columns(1)
                         ->grow(true),

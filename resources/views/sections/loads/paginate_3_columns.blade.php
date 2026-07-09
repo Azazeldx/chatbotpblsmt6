@@ -21,7 +21,7 @@
         {{ $data['loads'][$section->dataset->variable_name]->appends([$section->dataset->variable_name.'_page' => $data['loads'][$section->dataset->variable_name]->currentPage()])->links() }}
     @elseif ($data['navigation']['search'])
         <div class="flex justify-center py-4 border-b-2">
-            <a href="{{ route($data['navigation']['search']['slug'], ['category' => $section->dataset->category->slug]) }}" class="flex items-center gap-2 font-semibold transition-transform text-primary-500 hover:scale-105">
+            <a href="{{ route($data['navigation']['search']['slug'], ['category' => $section->dataset->category->slug]) }}" class="flex items-center gap-2 font-semibold transition-transform text-[#2563eb] hover:scale-105">
                 See All
             </a>
         </div>

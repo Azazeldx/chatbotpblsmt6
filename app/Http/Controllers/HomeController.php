@@ -18,7 +18,8 @@ class HomeController extends Controller
     public function index()
     {
         $data = $this->data();
-        $data['weather'] = WeatherController::getWeatherData();
+        // Section cuaca tidak lagi tampil di Home (desain baru), jadi panggilan API cuaca dilepas
+        // agar tidak membebani setiap load halaman. Blade loads/weather masih ada bila ingin dipakai lagi.
         return view('pages.index', compact('data'));
     }
 
@@ -28,7 +29,7 @@ class HomeController extends Controller
         $data['categories'] = Category::where('searchable', 1)->get();
         $data['tags'] = Tag::withoutTrashed()->get();
 
-        $tmp = Article::query();
+        $tmp = Article::query()->with(['cover', 'category', 'tags']);
         $tmp = $tmp->whereNotNull('published_at')->where('private', 0);
 
         $tmp = $tmp->whereHas('category', function ($query) use ($request) {
@@ -62,7 +63,8 @@ class HomeController extends Controller
         $data['article'] = Article::where('slug', $slug)->whereNotNull('published_at')->firstOrFail();
 
         $data['related'] = Article::query()
-            ->where('id', "!=", $data['article']->id) 
+            ->with(['cover', 'category'])
+            ->where('id', "!=", $data['article']->id)
             ->where('category_id', "=", $data['article']->category_id) 
             ->whereNotNull('published_at') 
             ->latest('published_at')    
@@ -79,15 +81,32 @@ class HomeController extends Controller
         return view('pages.details.'.$data['category']->detail_page, compact('data'));
     }
 
+    public function program(string $slug)
+    {
+        $programs = config('programs', []);
+        abort_unless(isset($programs[$slug]), 404);
+
+        $data = config('general-settings');
+        // landing-base butuh $data['page']->title; pakai halaman Profil sebagai konteks.
+        $data['page'] = Page::where('slug', 'profile')->first() ?? (object) ['title' => 'Program'];
+        $data['program'] = $programs[$slug];
+
+        return view('pages.program', compact('data'));
+    }
+
     public function mail(MailRequest $request)
     {
         $validated = $request->validated();
 
         try {
+            $body = "Nama Pengirim: {$validated['name']}\n"
+                . "Email: {$validated['email']}\n\n"
+                . $validated['message'];
+
             Mail::to($validated['email'])
                 ->send(new TestMail([
                     'subject' => $validated['subject'],
-                    'body' => $validated['message'],
+                    'body' => $body,
                 ]));
             return back()->with('success', 'Pesan berhasil dikirim!');
         } catch (\Exception $e) {

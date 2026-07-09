@@ -70,6 +70,7 @@ class ArticleResource extends Resource
                                             ->regex('/^[a-z0-9-]+$/'),
                                         CuratorPicker::make('cover_id')
                                             ->label('Cover')
+                                            ->buttonLabel('Pilih / Ganti Cover')
                                             ->required()
                                             ->relationship('cover', 'id'),
                                     ])
@@ -81,7 +82,11 @@ class ArticleResource extends Resource
                                             ->required()
                                             // ->disabledOn('edit')
                                             ->live()
-                                            ->relationship('category', 'category_name'),
+                                            ->relationship(
+                                                'category',
+                                                'category_name',
+                                                fn (Builder $query) => $query->whereNotIn('slug', ['event', 'departemen'])
+                                            ),
                                         Forms\Components\Select::make('tags')
                                             ->multiple()
                                             ->relationship('tags', 'tag_name')

@@ -21,7 +21,9 @@
         <x-filament-panels::page.unsaved-data-changes-alert />
     </x-filament-panels::page>
 
-    @if (config('general-settings.features.ai', false))
+    {{-- Chatbot widget di dashboard admin dinonaktifkan (dianggap tidak berguna di sini).
+         Hapus tanda komentar di bawah untuk mengaktifkannya kembali. --}}
+    {{-- @if (config('general-settings.features.ai', false))
         @livewire('chatbot-widget')
-    @endif
+    @endif --}}
 </div>

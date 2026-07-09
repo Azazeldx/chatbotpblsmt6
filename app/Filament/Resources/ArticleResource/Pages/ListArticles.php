@@ -19,14 +19,19 @@ class ListArticles extends ListRecords
         ];
     }
 
+    /**
+     * Kategori yang tidak ditampilkan sebagai tab di daftar artikel (berdasarkan slug).
+     */
+    protected array $hiddenTabCategories = ['event', 'departemen'];
+
     public function getTabs(): array
     {
-        $categories = Category::all() ?? [];
+        $categories = Category::whereNotIn('slug', $this->hiddenTabCategories)->get();
         $tabs = [];
 
         $tabs[] = Tab::make('All');
 
-        foreach ($categories as $categoryKey => $category) {
+        foreach ($categories as $category) {
             $tabs[] = Tab::make($category->category_name)
                 ->modifyQueryUsing(function ($query) use ($category) {
                     return $query->where('category_id', $category->id);
