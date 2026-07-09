@@ -9,7 +9,9 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Smalot\PdfParser\Parser;
 
@@ -100,6 +102,9 @@ class KnowledgeBaseResource extends Resource
     /**
      * Ekstrak teks dari PDF yang tersimpan lalu simpan ke kolom `content`.
      * Dipanggil dari hook afterCreate / afterSave pada halaman resource.
+     *
+     * Alur: utamakan pdftotext -layout (poppler) yang menjaga penjajaran kolom
+     * tabel; bila binary tidak tersedia di server, jatuh ke Smalot PdfParser.
      */
     public static function extractAndStoreContent(KnowledgeBase $record): void
     {
@@ -115,20 +120,68 @@ class KnowledgeBaseResource extends Resource
                 return;
             }
 
-            $parser = new Parser();
-            $pdf = $parser->parseFile($absolutePath);
-            $text = $pdf->getText();
+            // 1) Coba pdftotext -layout; 2) fallback Smalot bila gagal/tak ada.
+            $text = static::extractWithPdftotext($absolutePath)
+                ?? static::extractWithSmalot($absolutePath);
 
-            // Rapikan whitespace berlebih dari hasil ekstraksi.
-            $text = preg_replace('/[ \t]+/', ' ', $text);
-            $text = preg_replace('/\n{3,}/', "\n\n", $text);
-            $text = trim($text);
+            $text = static::tidyExtractedText($text);
 
             // Simpan tanpa memicu ulang hook (updateQuietly), lalu bersihkan cache.
             $record->updateQuietly(['content' => $text]);
-            \Illuminate\Support\Facades\Cache::forget('kb_pdf_active_content');
+            Cache::forget('kb_pdf_active_content');
         } catch (\Throwable $e) {
             Log::error('Gagal ekstrak teks PDF KnowledgeBase #' . $record->id . ': ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Ekstraksi utama memakai pdftotext -layout (poppler). Flag -layout menjaga
+     * penjajaran kolom sehingga tabel tetap terbaca. Return null bila binary
+     * tidak tersedia atau proses gagal, agar pemanggil bisa jatuh ke fallback.
+     */
+    private static function extractWithPdftotext(string $absolutePath): ?string
+    {
+        try {
+            $result = Process::timeout(120)->run([
+                'pdftotext', '-layout', '-enc', 'UTF-8', $absolutePath, '-',
+            ]);
+        } catch (\Throwable $e) {
+            // Binary 'pdftotext' tidak ditemukan di server.
+            Log::info('pdftotext tidak tersedia, memakai Smalot: ' . $e->getMessage());
+            return null;
+        }
+
+        if (!$result->successful()) {
+            Log::info('pdftotext gagal (exit ' . $result->exitCode() . '), memakai Smalot.');
+            return null;
+        }
+
+        $output = $result->output();
+        return trim($output) !== '' ? $output : null;
+    }
+
+    /**
+     * Fallback: Smalot PdfParser (PHP murni, tanpa binary). Kualitas tabel
+     * lebih rendah, tapi tidak butuh dependency sistem.
+     */
+    private static function extractWithSmalot(string $absolutePath): string
+    {
+        $parser = new Parser();
+        $pdf = $parser->parseFile($absolutePath);
+
+        return $pdf->getText();
+    }
+
+    /**
+     * Rapikan hasil ekstraksi TANPA merusak penjajaran kolom dari -layout:
+     * hanya buang spasi di ujung baris & mampatkan baris kosong berlebih.
+     * (Sengaja tidak mengecilkan spasi di tengah baris — itulah yang menjaga tabel.)
+     */
+    private static function tidyExtractedText(string $text): string
+    {
+        $text = str_replace("\r\n", "\n", $text);
+        $text = preg_replace('/[ \t]+\n/', "\n", $text);   // spasi/tab di akhir baris
+        $text = preg_replace('/\n{3,}/', "\n\n", $text);    // baris kosong berlebih
+        return trim($text);
     }
 }
