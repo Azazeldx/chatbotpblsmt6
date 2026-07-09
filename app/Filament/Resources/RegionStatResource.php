@@ -61,7 +61,7 @@ class RegionStatResource extends Resource
                     ->default(0),
 
                 Forms\Components\Toggle::make('is_active')
-                    ->label('Tampilkan di beranda')
+                    ->label('Tampilkan')
                     ->default(true),
             ]);
     }

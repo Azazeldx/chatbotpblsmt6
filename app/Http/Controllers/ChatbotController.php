@@ -13,6 +13,17 @@ use Illuminate\Support\Facades\Storage;
 
 class ChatbotController extends Controller
 {
+    /**
+     * Model cadangan yang dicoba berurutan bila model utama gagal (kuota 429,
+     * overload 503, atau timeout). Model 'lite' punya kuota gratis lebih longgar
+     * & lebih hemat token, jadi cocok sebagai penyelamat saat model utama jenuh.
+     * Kuota free tier dihitung PER model, sehingga pindah model benar-benar
+     * menolong saat kena 429.
+     */
+    private const AI_FALLBACK_MODELS = [
+        'gemini-flash-lite-latest',
+    ];
+
     public function __construct()
     {
         // Global Auth check removed to allow publicSendMessage
@@ -42,29 +53,102 @@ class ChatbotController extends Controller
             ];
         }
 
-        try {
-            $response = Http::timeout(20)
-                ->connectTimeout(8)
-                ->retry(1, 500, throw: false)
-                ->post(
-                    config('general-settings.ai.url') . config('general-settings.ai.api_key'),
-                    $payload
-                );
-        } catch (\Throwable $e) {
-            // Kegagalan koneksi (timeout, DNS, refused) — jangan biarkan error 500 mentah.
-            Log::error('Chatbot API connection error: ' . $e->getMessage());
-            return [null, null];
+        $lastJson = null;
+
+        // Coba model utama (dari konfigurasi) lalu model cadangan secara berurutan.
+        // Ini menolong saat model utama kena kuota (429) atau overload (503),
+        // karena kuota free tier dihitung per model.
+        foreach ($this->aiModelCandidates() as $i => $model) {
+            // Jeda singkat sebelum mencoba model berikutnya agar tidak membanting API.
+            if ($i > 0) {
+                usleep(400 * 1000); // 0,4 detik
+            }
+
+            try {
+                $response = Http::timeout(20)
+                    ->connectTimeout(8)
+                    ->post($this->buildModelUrl($model), $payload);
+            } catch (\Throwable $e) {
+                // Kegagalan koneksi (timeout, DNS, refused) — catat lalu coba model berikutnya.
+                Log::warning("Chatbot API connection error (model: {$model}): " . $e->getMessage());
+                continue;
+            }
+
+            $json = $response->json();
+            $lastJson = $json;
+
+            $reply = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
+            if ($reply !== null && $reply !== '') {
+                return [$json, $reply];
+            }
+
+            // Tidak ada teks balasan — catat penyebabnya.
+            Log::warning("Chatbot API no reply (model: {$model}): " . json_encode($json['error'] ?? $json));
+
+            // Hanya lanjut ke model cadangan bila penyebabnya memang layak di-retry
+            // (429 kuota, 503 overload, 500 internal). Untuk error lain (mis. 400
+            // payload salah, safety block) pindah model tidak akan menolong.
+            $status = $json['error']['code'] ?? $response->status();
+            if (!in_array($status, [429, 500, 503], true)) {
+                break;
+            }
         }
 
-        $json = $response->json();
+        return [$lastJson, null];
+    }
 
-        // Log respons yang tidak sesuai struktur untuk debugging.
-        if (!isset($json['candidates'][0]['content']['parts'][0]['text'])) {
-            Log::error('Chatbot API Error Response: ' . json_encode($json));
+    /**
+     * Daftar model yang dicoba berurutan: model utama (dari konfigurasi URL)
+     * diikuti model cadangan yang belum ada di daftar.
+     */
+    private function aiModelCandidates(): array
+    {
+        $models = [];
+
+        $primary = $this->configuredModel();
+        if ($primary !== null) {
+            $models[] = $primary;
         }
 
-        $reply = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
-        return [$json, $reply];
+        foreach (self::AI_FALLBACK_MODELS as $fallback) {
+            if ($fallback && !in_array($fallback, $models, true)) {
+                $models[] = $fallback;
+            }
+        }
+
+        // Jaga-jaga bila URL tidak memuat nama model: pakai apa adanya (null = URL asli).
+        return $models !== [] ? $models : [null];
+    }
+
+    /**
+     * Ambil nama model dari URL konfigurasi
+     * (mis. ".../models/gemini-flash-latest:generateContent?key=" -> "gemini-flash-latest").
+     */
+    private function configuredModel(): ?string
+    {
+        $url = (string) config('general-settings.ai.url');
+        if (preg_match('#/models/([^:]+):#', $url, $m)) {
+            return $m[1];
+        }
+        return null;
+    }
+
+    /**
+     * Bangun URL lengkap (termasuk API key) untuk model tertentu, dengan
+     * mengganti segmen model pada URL konfigurasi. $model null = URL apa adanya.
+     */
+    private function buildModelUrl(?string $model): string
+    {
+        $url = (string) config('general-settings.ai.url');
+        // Utamakan kunci dari .env (services.gemini.key) agar tidak ikut ter-commit.
+        // Fallback ke nilai lama di DB bila env belum diisi.
+        $apiKey = (string) (config('services.gemini.key') ?: config('general-settings.ai.api_key'));
+
+        if ($model !== null) {
+            $url = preg_replace('#/models/[^:]+:#', "/models/{$model}:", $url, 1);
+        }
+
+        return $url . $apiKey;
     }
 
     /**
@@ -131,7 +215,7 @@ class ChatbotController extends Controller
 
             if (!empty($matchedItems)) {
                 usort($matchedItems, fn ($a, $b) => $b['score'] <=> $a['score']);
-                $topItems = array_slice($matchedItems, 0, 8);
+                $topItems = array_slice($matchedItems, 0, 5);
                 foreach ($topItems as &$ti) {
                     unset($ti['score']);
                     $ti = $this->truncateItemDetail($ti);
@@ -158,13 +242,13 @@ class ChatbotController extends Controller
         }
 
         // Terapkan anggaran total karakter agar prompt tidak membengkak & kuota Gemini tidak jebol.
-        return $this->capKnowledgeSize($relevantKnowledge, 12000);
+        return $this->capKnowledgeSize($relevantKnowledge, 6000);
     }
 
     /**
      * Potong field detail ('d') tiap item knowledge agar tidak boros token.
      */
-    private function truncateItemDetail(array $item, int $maxDetail = 600): array
+    private function truncateItemDetail(array $item, int $maxDetail = 400): array
     {
         if (isset($item['d']) && strlen($item['d']) > $maxDetail) {
             $item['d'] = substr($item['d'], 0, $maxDetail) . '...';
@@ -238,17 +322,17 @@ class ChatbotController extends Controller
                 }
             }
             usort($scored, fn ($a, $b) => $b['score'] <=> $a['score']);
-            $selected = array_map(fn ($s) => $s['chunk'], array_slice($scored, 0, 15));
+            $selected = array_map(fn ($s) => $s['chunk'], array_slice($scored, 0, 10));
 
             if (empty($selected)) {
                 $selected = array_slice($chunks, 0, 5);
             }
         }
 
-        // Batasi total panjang agar hemat token (~12k karakter).
+        // Batasi total panjang agar hemat token (~6k karakter).
         $result = '';
         foreach ($selected as $chunk) {
-            if (strlen($result) + strlen($chunk) > 12000) {
+            if (strlen($result) + strlen($chunk) > 6000) {
                 break;
             }
             $result .= $chunk . "\n\n";
