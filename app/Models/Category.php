@@ -35,7 +35,7 @@ class Category extends Model
     {
         static::saving(function ($data) {
             if ($data->isDirty('category_name') && empty($data->slug)) {
-                $data->slug = Str::slug($data->tag_name);
+                $data->slug = Str::slug($data->category_name);
             }
 
             $record = Category::where([['id', '!=', $data->id], ['default', 1]])->first();

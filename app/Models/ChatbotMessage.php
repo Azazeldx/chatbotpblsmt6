@@ -12,6 +12,12 @@ class ChatbotMessage extends Model
         'message'
     ];
 
+    /**
+     * Perbarui updated_at session induk setiap ada pesan baru,
+     * agar "inaktivitas" dihitung dari pesan terakhir (dipakai auto-cleanup guest).
+     */
+    protected $touches = ['session'];
+
     public function session()
     {
         return $this->belongsTo(ChatbotSession::class);

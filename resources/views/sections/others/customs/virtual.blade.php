@@ -6,7 +6,7 @@
         .logo {
             width: 60px;
             height: 60px;
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #4169E1 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -22,11 +22,11 @@
         }
 
         .nav-link:hover {
-            color: #4169E1;
+            color: #2563eb;
         }
 
         .nav-link.active {
-            color: #4169E1;
+            color: #2563eb;
         }
 
         .nav-link.active::after {
@@ -36,7 +36,7 @@
             left: 0;
             width: 100%;
             height: 2px;
-            background-color: #4169E1;
+            background-color: #2563eb;
         }
 
         @media (max-width: 768px) {
@@ -55,9 +55,9 @@
                     VIRTUAL TOUR 360
                 </h2>
                 <h3 class="mb-6 text-2xl font-semibold text-white md:text-3xl lg:text-4xl">
-                    FASILITAS POLITEKNIK NEGERI BALI
+                    WILAYAH KABUPATEN PASURUAN
                 </h3>
-                <a href="/virtual/index.htm" target="_blank" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-xl transition-all transform hover:scale-105 shadow-xl">
+                <a href="/virtual/index.htm" target="_blank" class="inline-flex items-center bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold py-4 px-10 rounded-xl transition-all transform hover:scale-105 shadow-xl">
                 <i class="fas fa-vr-cardboard mr-3 text-2xl"></i>
                 MULAI TOUR SEKARANG
             </a>

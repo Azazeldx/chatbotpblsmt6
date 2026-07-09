@@ -26,14 +26,11 @@ class ApplicationFieldsForm
                             FileUpload::make('site_logo')
                                 ->image()
                                 ->disk('public')
-                                ->directory('assets')
-                                ->imageEditor()
-                                ->getUploadedFileNameForStorageUsing(fn () => 'site_logo.png'),
+                                ->directory('assets'),
                             FileUpload::make('site_favicon')
                                 ->image()
                                 ->disk('public')
                                 ->directory('assets')
-                                ->getUploadedFileNameForStorageUsing(fn () => 'site_favicon.ico')
                                 ->acceptedFileTypes(['image/x-icon', 'image/vnd.microsoft.icon']),
                         ])
                         ->columns(1),

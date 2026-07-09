@@ -20,7 +20,9 @@ class ChatbotSession extends Model
     protected static function booted()
     {
         static::creating(function ($data) {
-            $data->user_id = Auth::user()->id;
+            if (Auth::check()) {
+                $data->user_id = Auth::id();
+            }
         });
     }
 }

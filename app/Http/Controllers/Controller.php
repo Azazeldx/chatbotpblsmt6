@@ -13,14 +13,15 @@ abstract class Controller
     {
         $data = config('general-settings');
 
+        $pageQuery = Page::with('sections.section.dataset.category');
         if (Route::currentRouteName() == '/' && !empty($data['navigation']['home'])) {
-            $data['page'] = Page::where('slug', $data['navigation']['home']['slug'])->firstOrFail();
+            $data['page'] = $pageQuery->where('slug', $data['navigation']['home']['slug'])->firstOrFail();
         } else {
-            $data['page'] = Page::where('slug', Route::currentRouteName())->firstOrFail();
+            $data['page'] = $pageQuery->where('slug', Route::currentRouteName())->firstOrFail();
         }
 
         if ($data['features']['sponsors']) {
-            $data['sponsors'] = Sponsor::where('featured', 1)->with('category')->get()->sortBy(function ($item) {
+            $data['sponsors'] = Sponsor::where('featured', 1)->with(['category', 'image'])->get()->sortBy(function ($item) {
                 return $item->category->sort_order ?? 999;
             });
         }
@@ -29,7 +30,7 @@ abstract class Controller
             $data['sections'][$section->section->title] = $section->section;
             if ($section->section->has_dataset) {
                 $tmp = $section->section->dataset;
-                $tmp2 = Article::query()->whereNotNull('published_at');
+                $tmp2 = Article::query()->with(['cover', 'category', 'tags'])->whereNotNull('published_at');
                 $tmp2 = $tmp2->where([
                     ['category_id', $tmp->category->id],
                     ['private', 0]

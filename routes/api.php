@@ -19,3 +19,13 @@ Route::get('/test', function () {
 Route::get('/weather', [WeatherController::class, 'getWeatherData']);
 Route::get('/home', [HomeController::class, 'index']); // Example for HomeController
 
+
+Route::controller(App\Http\Controllers\ChatbotController::class)->group(function () {
+    // Batasi endpoint publik agar tidak di-spam (cegah abuse & biaya Gemini membengkak).
+    Route::post('/chatbot/public/send', 'sendPublic')
+        ->middleware('throttle:20,1')
+        ->name('api.chatbot.public.send');
+    Route::post('/chatbot/send', 'send');
+    Route::get('/chatbot/sessions', 'getSessions');
+    Route::get('/chatbot/messages/{id}', 'getMessages');
+});

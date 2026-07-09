@@ -1,46 +1,120 @@
-<div class="lg:!px-40 lg:!py-12 md:!px-20 md:!py-12 px-8 py-6">
-    <div class="grid grid-cols-1 gap-16 mx-auto max-w-7xl md:grid-cols-2">
-        <!-- Left Side: Contact Form -->
-        <div class="md:p-8" data-aos="fade-right">
-            <!-- Contact Us Title -->
-            <h2 class="mb-4 text-4xl font-semibold tracking-wider text-gray-800 md:text-5xl lg:text-6xl">Contact Us</h2>
-            <p class="mb-6 text-gray-800">Tanyakan hal yang ingin Anda ketahui tentang kami pada kolom di bawah ini!</p>
-            <!-- Form -->
-            <form action="{{ route('mail') }}" method="POST" class="space-y-6">
+{{-- Halaman Kontak: form aspirasi + kartu informasi kantor --}}
+@php
+    $officeAddress = $data['location']['address'] ?? 'Jl. Raya Raci Km. 9, Kec. Bangil, Kab. Pasuruan';
+    $officePhone   = $data['contacts']['phone'] ?? '(0343) 748368';
+    $officeEmail   = $data['contacts']['email'] ?? 'bapperida@pasuruankab.go.id';
+    $officeMapUrl  = $data['location']['url'] ?? 'https://maps.google.com/?q=Bapperida+Kabupaten+Pasuruan';
+@endphp
+
+<section class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:!px-20 py-16 lg:py-24">
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+
+        <!-- Kiri: judul + form -->
+        <div data-aos="fade-right">
+            <span class="text-[#2563eb] font-bold tracking-[0.25em] text-xs uppercase">Saluran Aspirasi</span>
+            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[0.95] mt-4 mb-5">
+                Hubungi<br>Kami
+            </h1>
+            <p class="text-slate-500 text-base lg:text-lg leading-relaxed max-w-md mb-8">
+                Layanan pengaduan dan informasi terbuka bagi seluruh masyarakat Kabupaten Pasuruan.
+            </p>
+
+            {{-- Flash message --}}
+            @if (session('success'))
+                <div class="mb-6 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 text-sm font-medium">
+                    <i class="fas fa-circle-check mr-1"></i> {{ session('success') }}
+                </div>
+            @endif
+            @if (session('danger'))
+                <div class="mb-6 rounded-xl bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm font-medium">
+                    <i class="fas fa-circle-exclamation mr-1"></i> {{ session('danger') }}
+                </div>
+            @endif
+            @if ($errors->any())
+                <div class="mb-6 rounded-xl bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm font-medium">
+                    <i class="fas fa-circle-exclamation mr-1"></i> Mohon periksa kembali isian formulir Anda.
+                </div>
+            @endif
+
+            <form action="{{ route('mail') }}" method="POST" class="space-y-5">
                 @csrf
-                <!-- Email Field -->
-                <div>
-                    <input type="email" id="email" name="email" required
-                        class="w-full p-2 placeholder-gray-500 border border-gray-300 rounded-lg hover:border-[blue] hover:bg-white hover:text-[blue] "
-                        placeholder="Email Anda *">
+
+                <div class="grid sm:grid-cols-2 gap-5">
+                    <input type="text" name="name" required value="{{ old('name') }}"
+                        placeholder="Nama Lengkap *"
+                        class="w-full px-4 py-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 focus:bg-white transition">
+                    <input type="email" name="email" required value="{{ old('email') }}"
+                        placeholder="Email Anda *"
+                        class="w-full px-4 py-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 focus:bg-white transition">
                 </div>
 
-                <!-- Subject Field -->
-                <div>
-                    <input type="text" id="subject" name="subject" required
-                        class="w-full p-2 placeholder-gray-500 border border-gray-300 rounded-lg hover:border-[blue] hover:bg-white hover:text-[blue]"
-                        placeholder="Subject *">
-                </div>
+                <input type="text" name="subject" required value="{{ old('subject') }}"
+                    placeholder="Subjek Pesan *"
+                    class="w-full px-4 py-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 focus:bg-white transition">
 
-                <!-- Message Field -->
-                <div>
-                    <textarea id="message" name="message" required rows="6"
-                        class="w-full p-2 placeholder-gray-500 border border-gray-300 rounded-lg hover:border-[blue] hover:bg-white hover:text-[blue]"
-                        placeholder="Tulis pesan Anda di sini *"></textarea>
-                </div>
+                <textarea name="message" required rows="6"
+                    placeholder="Deskripsikan pertanyaan atau aspirasi Anda secara detail..."
+                    class="w-full px-4 py-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 focus:bg-white transition resize-none">{{ old('message') }}</textarea>
 
-                <!-- Submit Button -->
-                <div>
-                    <button type="submit"
-                        class="flex items-center justify-center w-full gap-2 px-4 py-2 font-medium text-white transition border-2 rounded-lg bg-[blue] hover:border-[blue] hover:bg-white hover:text-[blue] ">
-                        Kirim Pesan
-                    </button>
-                </div>
+                <button type="submit"
+                    class="w-full py-4 rounded-xl text-white text-sm font-bold uppercase tracking-widest shadow-lg shadow-blue-500/30 transition hover:-translate-y-0.5 hover:shadow-xl"
+                    style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                    Kirim Aspirasi Sekarang
+                </button>
             </form>
         </div>
-        <!-- Right Side: Image -->
-        <div class="items-center justify-center hidden md:flex" data-aos="fade-left">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d23869.59920651211!2d115.15241036915143!3d-8.803814270812888!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd244c13ee9d753%3A0x6c05042449b50f81!2sPoliteknik%20Negeri%20Bali!5e0!3m2!1sid!2sid!4v1762275032755!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+        <!-- Kanan: kartu informasi kantor -->
+        <div data-aos="fade-left" class="lg:mt-4">
+            <div class="relative bg-white rounded-3xl shadow-[0_20px_50px_-20px_rgba(15,23,42,0.25)] border border-slate-100 p-8 lg:p-10 overflow-hidden">
+                <!-- Lipatan sudut -->
+                <div class="absolute top-0 right-0 w-0 h-0" style="border-top: 64px solid #2563eb; border-left: 64px solid transparent;"></div>
+
+                <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Informasi Kantor</h2>
+                <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider leading-relaxed mb-8 max-w-xs">
+                    Pusat Data dan Perencanaan Pembangunan Daerah Bapperrida
+                </p>
+
+                <div class="space-y-6">
+                    <!-- Lokasi -->
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center">
+                            <i class="fas fa-location-dot text-[#2563eb]"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Lokasi</p>
+                            <p class="text-sm font-bold text-slate-800 leading-snug">{{ $officeAddress }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Layanan / telepon -->
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center">
+                            <i class="fas fa-phone text-[#2563eb]"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Layanan</p>
+                            <a href="tel:{{ $officePhone }}" class="text-sm font-bold text-slate-800 hover:text-[#2563eb] transition">{{ $officePhone }}</a>
+                        </div>
+                    </div>
+
+                    <!-- Surat elektronik -->
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center">
+                            <i class="fas fa-envelope text-[#2563eb]"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Surat Elektronik</p>
+                            <a href="mailto:{{ $officeEmail }}" class="text-sm font-bold text-slate-800 hover:text-[#2563eb] transition break-all">{{ $officeEmail }}</a>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{{ $officeMapUrl }}" target="_blank" rel="noopener"
+                   class="mt-8 flex items-center justify-center w-full py-3.5 rounded-xl border-2 border-slate-900 text-slate-900 text-[11px] font-bold uppercase tracking-widest transition hover:bg-slate-900 hover:text-white">
+                    Lihat pada Peta
+                </a>
+            </div>
         </div>
     </div>
-</div>
+</section>

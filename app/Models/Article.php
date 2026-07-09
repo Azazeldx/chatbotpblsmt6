@@ -29,7 +29,7 @@ class Article extends Model
     ];
 
     protected $casts = [
-        'privated' => 'boolean',
+        'private' => 'boolean',
         'fields' => 'array',
         'metadata' => 'array',
         'published_at' => 'datetime'

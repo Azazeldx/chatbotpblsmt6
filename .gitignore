@@ -23,3 +23,16 @@ yarn-error.log
 /.vscode
 /.zed
 *.zip
+
+# Script one-off, debug, & catatan perencanaan (tidak untuk repo)
+/scratch
+/scratch*.php
+/storage/app/scratch.php
+/db_update_rpjmd*.php
+/db_theme.php
+/debug_nav.php
+/check_config_boot.php
+/check_logo.php
+/enable_ai.php
+/planmaster.md
+/planning by gemini to claude/

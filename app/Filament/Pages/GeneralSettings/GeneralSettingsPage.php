@@ -42,23 +42,7 @@ class GeneralSettingsPage extends Page
     {
         $this->data = GeneralSetting::first()?->toArray() ?: [];
 
-        if (isset($this->data['site_logo']) && is_string($this->data['site_logo'])) {
-            $this->data['site_logo'] = [
-                'name' => $this->data['site_logo'],
-            ];
-        }
 
-        if (isset($this->data['site_favicon']) && is_string($this->data['site_favicon'])) {
-            $this->data['site_favicon'] = [
-                'name' => $this->data['site_favicon'],
-            ];
-        }
-
-        if (isset($this->data['google_analytics']['service-account-credentials']) && is_string($this->data['google_analytics']['service-account-credentials'])) {
-            $this->data['google_analytics']['service-account-credentials'] = [
-                'name' => $this->data['google_analytics']['service-account-credentials'],
-            ];
-        }
 
         if ($this->data['theme']) {
             foreach ($this->data['theme'] as $key => $value) {

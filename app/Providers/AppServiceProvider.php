@@ -24,55 +24,101 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Cache::rememberForever('general-settings', function () {
-            return [];
+        // 1. Listen for changes to clear the cache automatically
+        $clearCache = function () {
+            Cache::forget('app_general_settings_data');
+        };
+        GeneralSetting::saved($clearCache);
+        Page::saved($clearCache);
+        Section::saved($clearCache);
+        GeneralSetting::deleted($clearCache);
+        Page::deleted($clearCache);
+        Section::deleted($clearCache);
+
+        // 2. Cache the heavy database query processing permanently
+        $data = Cache::rememberForever('app_general_settings_data', function () {
+            try {
+                $setting = GeneralSetting::select([
+                    'site_name',
+                    'site_description',
+                    'site_logo',
+                    'site_favicon',
+                    'site_url',
+                    'site_dashboard_url',
+                    'location',
+                    'contacts',
+                    'theme',
+                    'email_settings',
+                    'social_network',
+                    'navigation',
+                    'features',
+                    'ai',
+                    'google_analytics',
+                    'user_features',
+                ])->first();
+
+                if (!$setting) return [];
+                
+                $data = $setting->toArray();
+
+                // navigation
+                $navigation = $data['navigation'] ?? [];
+
+                $navigation['header'] = $navigation['header'] ?? null;
+                $navigation['footer'] = $navigation['footer'] ?? null;
+                $navigation['search'] = $navigation['search'] ?? null;
+                $navigation['home'] = $navigation['home'] ?? null;
+                $navigation['nav_items'] = $navigation['nav_items'] ?? [];
+
+                // Ambil semua Sections yang dibutuhkan dalam 1 query
+                $sectionIds = array_filter([$navigation['header'], $navigation['footer']]);
+                $sections = Section::whereIn('id', $sectionIds)->get()->keyBy('id');
+                $navigation['header'] = $sections->get($navigation['header'])?->toArray();
+                $navigation['footer'] = $sections->get($navigation['footer'])?->toArray();
+
+                // Kumpulkan semua ID Page yang dibutuhkan
+                $pageIds = array_filter([$navigation['search'], $navigation['home']]);
+                foreach ($navigation['nav_items'] as $value) {
+                    if ($value['type'] == 'page' && !empty($value['page'])) {
+                        $pageIds[] = $value['page'];
+                    }
+                }
+                
+                // Ambil semua Pages dalam 1 query
+                $pages = Page::whereIn('id', $pageIds)->get()->keyBy('id');
+                
+                $navigation['search'] = $pages->get($navigation['search'])?->toArray();
+                $navigation['home'] = $pages->get($navigation['home'])?->toArray();
+
+                foreach ($navigation['nav_items'] as $key => $value) {
+                    if ($value['type'] == 'page') {
+                        $page = $pages->get($value['page']);
+                        if ($page) {
+                            $navigation['nav_items'][$key]['page'] = $page->toArray();
+                        } else {
+                            unset($navigation['nav_items'][$key]);
+                        }
+                    } elseif ($value['type'] == 'link') {
+                        if (empty($value['link']['url']) || empty($value['link']['label'])) {
+                            unset($navigation['nav_items'][$key]);
+                        }
+                    }
+                }
+
+                $data['navigation'] = $navigation;
+                
+                return $data;
+            } catch (\Exception $e) {
+                return [];
+            }
         });
 
-        $data = GeneralSetting::select([
-            'site_name',
-            'site_description',
-            'site_logo',
-            'site_favicon',
-            'site_url',
-            'site_dashboard_url',
-            'location',
-            'contacts',
-            'theme',
-            'email_settings',
-            'social_network',
-            'navigation',
-            'features',
-            'ai',
-            'google_analytics',
-            'user_features',
-        ])->first()->toArray();
+        if (empty($data)) {
+            return;
+        }
 
         // app url
         Config::set('app.url', $data['site_url'] ?? env('APP_URL'));
-
-        // navigation
-        $navigation = $data['navigation'] ?? [];
-
-        $navigation['header'] = $navigation['header'] ?? null;
-        $navigation['footer'] = $navigation['footer'] ?? null;
-        $navigation['search'] = $navigation['search'] ?? null;
-        $navigation['home'] = $navigation['home'] ?? null;
-        $navigation['nav_items'] = $navigation['nav_items'] ?? [];
-
-        $navigation['header'] = Section::find($navigation['header'])?->toArray();
-        $navigation['footer'] = Section::find($navigation['footer'])?->toArray();
-        $navigation['search'] = Page::find($navigation['search'])?->toArray();
-        $navigation['home'] = Page::find($navigation['home'])?->toArray();
-
-
-        foreach ($navigation['nav_items'] as $key => $value) {
-            if ($value['type'] == 'page') {
-                $navigation['nav_items'][$key]['page'] = Page::find($value['page'])?->toArray();
-            }
-        }
-
-        $data['navigation'] = $navigation;
-        unset($navigation);
 
         // theme
         foreach ($data['theme'] as $keyColor => $color) {
@@ -96,6 +142,7 @@ class AppServiceProvider extends ServiceProvider
             'social_network',
             'navigation',
             'features',
+            'ai',
             'user_features',
         ])));
 

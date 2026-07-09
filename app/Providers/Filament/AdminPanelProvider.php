@@ -133,6 +133,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 'Settings',
+                'Profil Daerah',
                 'Filament Shield',
                 'Accounts',
                 'Article',

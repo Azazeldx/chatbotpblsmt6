@@ -6,14 +6,7 @@ use App\Http\Controllers\TestController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\WeatherController;
 
-if (config('general-settings.features.ai', false)) {
-    Route::controller(ChatbotController::class)->group(function () {
-        Route::post('/api/article/generate', 'generateArticle');
-        Route::post('/api/chatbot/send', 'send');
-        Route::get('/api/chatbot/sessions', 'getSessions');
-        Route::get('/api/chatbot/messages/{id}', 'getMessages');
-    });
-}
+
 
 $data = config('general-settings.navigation');
 
@@ -36,6 +29,8 @@ foreach ($data['nav_items'] as $key => $value) {
 Route::post('/mail', [HomeController::class, 'mail'])->name('mail');
 
 Route::get('/detail/{category}/{slug}', [HomeController::class, 'detail'])->name('detail');
+
+Route::get('/program/{slug}', [HomeController::class, 'program'])->name('program.detail');
 
 // Testing routes
 if (config('app.debug', false)) {
